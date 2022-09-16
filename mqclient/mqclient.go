@@ -12,7 +12,6 @@ import (
 
 type Client struct {
 	logger          *log.Logger
-	QueueName       string
 	connection      *amqp.Connection
 	Channel         *amqp.Channel
 	Done            chan bool
@@ -38,11 +37,10 @@ var (
 
 // New creates a new consumer state instance, and automatically
 // attempts to connect to the server.
-func New(queueName, addr string) *Client {
+func New(addr string) *Client {
 	client := Client{
-		QueueName: queueName,
-		logger:    log.New(os.Stdout, "[mqclient] ", log.Ldate|log.Ltime|log.Lshortfile),
-		Done:      make(chan bool),
+		logger: log.New(os.Stdout, "[mqclient] ", log.Ldate|log.Ltime|log.Lshortfile),
+		Done:   make(chan bool),
 	}
 	go client.handleReconnect(addr)
 	return &client
@@ -125,16 +123,7 @@ func (client *Client) init(conn *amqp.Connection) error {
 	if err != nil {
 		return err
 	}
-	if _, err := ch.QueueDeclare(
-		client.QueueName,
-		false,
-		false,
-		false,
-		false,
-		nil,
-	); err != nil {
-		return err
-	}
+
 	err = ch.Confirm(false)
 
 	if err != nil {
@@ -171,12 +160,22 @@ func (client *Client) changeChannel(channel *amqp.Channel) {
 // it continuously re-sends messages until a confirm is received.
 // This will block until the server sends a confirm. Errors are
 // only returned if the push action itself fails, see UnsafePush.
-func (client *Client) Push(data []byte) error {
+func (client *Client) Push(queueName string, data []byte) error {
 	if !client.IsReady {
 		return errors.New("failed to push: not connected")
 	}
+	if _, err := client.Channel.QueueDeclare(
+		queueName,
+		false,
+		false,
+		false,
+		false,
+		nil,
+	); err != nil {
+		return err
+	}
 	for {
-		err := client.UnsafePush(data, "", client.QueueName)
+		err := client.UnsafePush(data, "", queueName)
 
 		if err != nil {
 			client.logger.Println("Push failed. Retrying...")
@@ -234,17 +233,6 @@ func (client *Client) UnsafePush(data []byte, exchange string, key string) error
 	if !client.IsReady {
 		return errNotConnected
 	}
-	_, err := client.Channel.QueueDeclare(
-		client.QueueName,
-		false,
-		false,
-		false,
-		false,
-		nil,
-	)
-	if err != nil {
-		return err
-	}
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
@@ -265,7 +253,7 @@ func (client *Client) UnsafePush(data []byte, exchange string, key string) error
 // It is required to call delivery.Ack when it has been
 // successfully processed, or delivery.Nack when it fails.
 // Ignoring this will cause data to build up on the server.
-func (client *Client) Consume() (<-chan amqp.Delivery, error) {
+func (client *Client) Consume(queueName string) (<-chan amqp.Delivery, error) {
 	if !client.IsReady {
 		return nil, errNotConnected
 	}
@@ -279,7 +267,7 @@ func (client *Client) Consume() (<-chan amqp.Delivery, error) {
 	}
 
 	return client.Channel.Consume(
-		client.QueueName,
+		queueName,
 		"",
 		false,
 		false,

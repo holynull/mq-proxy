@@ -15,26 +15,37 @@ const (
 type PartyNode struct {
 	logger      *log.Logger
 	NodePartyId string
+	QueueName   string
 	mqClient    *mqclient.Client
 }
 
-func New(nodePartyId string, client *mqclient.Client) (*PartyNode, error) {
-
+func New(nodePartyId string, queueName string, client *mqclient.Client) (*PartyNode, error) {
+	if _, err := client.Channel.QueueDeclare(
+		queueName,
+		false,
+		false,
+		false,
+		false,
+		nil,
+	); err != nil {
+		return nil, err
+	}
 	if err := client.Channel.ExchangeDeclare(BROADCAST_EXCHANGE_NAME, "fanout", false, false, false, false, nil); err != nil {
 		return nil, err
 	}
 	if err := client.Channel.ExchangeDeclare(P2P_EXCHANGE_NAME, "direct", false, false, false, false, nil); err != nil {
 		return nil, err
 	}
-	if err := client.Channel.QueueBind(client.QueueName, nodePartyId, BROADCAST_EXCHANGE_NAME, false, nil); err != nil {
+	if err := client.Channel.QueueBind(queueName, nodePartyId, BROADCAST_EXCHANGE_NAME, false, nil); err != nil {
 		return nil, err
 	}
-	if err := client.Channel.QueueBind(client.QueueName, nodePartyId, P2P_EXCHANGE_NAME, false, nil); err != nil {
+	if err := client.Channel.QueueBind(queueName, nodePartyId, P2P_EXCHANGE_NAME, false, nil); err != nil {
 		return nil, err
 	}
 	return &PartyNode{
 		logger:      log.New(os.Stdout, "[mqclient] ", log.Ldate|log.Ltime|log.Lshortfile),
 		NodePartyId: nodePartyId,
+		QueueName:   queueName,
 		mqClient:    client,
 	}, nil
 }

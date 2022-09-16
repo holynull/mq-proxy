@@ -10,8 +10,8 @@ import (
 
 func TestMqClient(t *testing.T) {
 	addr := "amqp://guest:guest@localhost:5672/"
-	sender := New("mq_client_test", addr)
-	consumer := New("mq_client_test", addr)
+	sender := New(addr)
+	consumer := New(addr)
 	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(time.Second*20))
 	defer cancel()
 	go runComsumer(consumer, ctx, t)
@@ -25,7 +25,7 @@ loop:
 		select {
 		// Attempt to push a message every 2 seconds
 		case <-time.After(time.Second * 2):
-			if err := sender.Push(message); err != nil {
+			if err := sender.Push("mq_client_test", message); err != nil {
 				t.Errorf("Push failed: %s\n", err)
 			} else {
 				t.Logf("Push succeeded!")
@@ -39,7 +39,7 @@ loop:
 
 func runComsumer(consumer *Client, ctx context.Context, t *testing.T) {
 	<-time.After(time.Second)
-	deliveries, err := consumer.Consume()
+	deliveries, err := consumer.Consume("mq_client_test")
 	if err != nil {
 		t.Errorf("Could not start consuming: %s\n", err)
 		return
@@ -63,7 +63,7 @@ func runComsumer(consumer *Client, ctx context.Context, t *testing.T) {
 			// This case handles the event of closed channel e.g. abnormal shutdown
 			t.Errorf("AMQP Channel closed due to: %s\n", amqErr)
 
-			deliveries, err = consumer.Consume()
+			deliveries, err = consumer.Consume("mq_client_test")
 			if err != nil {
 				// If the AMQP channel is not ready, it will continue the loop. Next
 				// iteration will enter this case because chClosedCh is closed by the
