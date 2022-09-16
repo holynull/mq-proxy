@@ -257,7 +257,16 @@ func (client *Client) Consume(queueName string) (<-chan amqp.Delivery, error) {
 	if !client.IsReady {
 		return nil, errNotConnected
 	}
-
+	if _, err := client.Channel.QueueDeclare(
+		queueName,
+		false,
+		false,
+		false,
+		false,
+		nil,
+	); err != nil {
+		return nil, err
+	}
 	if err := client.Channel.Qos(
 		1,
 		0,
