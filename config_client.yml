@@ -1,0 +1,5 @@
+mq:
+  addr: amqp://guest:guest@localhost:5672/
+  queueName: queue_party_node_1
+node:
+  partyNodeId: party_node_1
