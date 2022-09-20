@@ -1,8 +1,8 @@
 # mq-proxy
 
-***前提条件：***需要一个rabbitmq服务，或者使用脚本启动一个rabbitmq的docker容器，`./start-docker-rabbit.sh`
+***前提条件：*** 需要一个rabbitmq服务，或者使用脚本启动一个rabbitmq的docker容器，`./start-docker-rabbit.sh`
 
-** 运行说明
+## 运行说明
 
 mq_proxy能够接收一个名为target的参数，当target等于client时，表示启动运行在enclave外部宿主机上的程序；当target等于server时，表示启动运行在enclave内部的程序。
 
