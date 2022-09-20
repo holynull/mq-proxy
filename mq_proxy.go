@@ -28,7 +28,6 @@ func main() {
 				client.SendMessageToInside([]byte("Message request some inside service."))
 			case my_vsock.VSOCK_EOF:
 				break Loop
-
 			}
 		}
 	case "server":
