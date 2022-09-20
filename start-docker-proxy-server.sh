@@ -1,0 +1,1 @@
+docker run -it --rm --name proxy_server  proxy_server /mq_proxy --target server

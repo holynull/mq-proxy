@@ -1,0 +1,5 @@
+# proxy_server 
+FROM amazonlinux as proxy_server 
+COPY config_server.yml ./
+COPY mq_proxy ./
+CMD ["/mq_proxy","--target","server"] 

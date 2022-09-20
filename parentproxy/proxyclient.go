@@ -29,8 +29,9 @@ func NewProxyClient() *ProxyVsockClient {
 	_conf := viper.GetViper()
 
 	return &ProxyVsockClient{
-		logger: log.New(os.Stdout, "[proxy client] ", log.Ldate|log.Ltime|log.Lshortfile),
-		Config: _conf,
+		logger:  log.New(os.Stdout, "[proxy client] ", log.Ldate|log.Ltime|log.Lshortfile),
+		Config:  _conf,
+		Proxies: make(map[string]Proxy),
 	}
 }
 

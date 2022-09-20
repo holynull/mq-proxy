@@ -10,9 +10,11 @@ import (
 )
 
 type ProxyVsockServer struct {
-	logger    *log.Logger
-	Config    *viper.Viper
-	ProxyConn *net.Conn
+	logger             *log.Logger
+	Config             *viper.Viper
+	ProxyConn          *net.Conn
+	ProxyStatusChan    chan string
+	MessageFromOutSide chan string
 }
 
 func NewProxyServer() *ProxyVsockServer {
@@ -25,8 +27,10 @@ func NewProxyServer() *ProxyVsockServer {
 	}
 	_conf := viper.GetViper()
 	return &ProxyVsockServer{
-		logger: log.New(os.Stdout, "[proxy server] ", log.Ldate|log.Ltime|log.Lshortfile),
-		Config: _conf,
+		logger:             log.New(os.Stdout, "[proxy server] ", log.Ldate|log.Ltime|log.Lshortfile),
+		Config:             _conf,
+		ProxyStatusChan:    make(chan string),
+		MessageFromOutSide: make(chan string),
 	}
 }
 
@@ -42,8 +46,10 @@ func (server *ProxyVsockServer) StartServer() {
 		switch string(msg.Data) {
 		case PROXY_READY:
 			server.ProxyConn = &msg.Conn
+			server.ProxyStatusChan <- PROXY_READY
 		default:
 			server.logger.Printf("Message is: %s", string(msg.Data))
+			server.MessageFromOutSide <- string(msg.Data)
 		}
 	}
 }

@@ -3,6 +3,7 @@ package parentproxy
 import (
 	"encoding/json"
 
+	"github.com/holynull/mq-proxy/mqproxy"
 	"github.com/holynull/my-vsock/my_vsock"
 )
 
@@ -10,6 +11,7 @@ func (server *ProxyVsockServer) BroadcastMessage(data []byte) {
 	msg := make(map[string]interface{}, 0)
 	msg["type"] = PROXY_TYPE_RABBITMQ
 	_d := make(map[string]interface{}, 0)
+	_d["op"] = mqproxy.OPTERATION_TYPE_BROADCAST
 	_d["data"] = string(data)
 	msg["data"] = _d
 	if b, err := json.Marshal(msg); err != nil {
@@ -23,6 +25,7 @@ func (server *ProxyVsockServer) SendMessageToNode(data []byte, toNodeId string) 
 	msg := make(map[string]interface{}, 0)
 	msg["type"] = PROXY_TYPE_RABBITMQ
 	_d := make(map[string]interface{}, 0)
+	_d["op"] = mqproxy.OPTERATION_TYPE_P2P
 	_d["data"] = string(data)
 	_d["toId"] = toNodeId
 	msg["data"] = _d
