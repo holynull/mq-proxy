@@ -12,10 +12,11 @@ import (
 )
 
 type ProxyVsockClient struct {
-	logger  *log.Logger
-	Proxies map[string]Proxy
-	Config  *viper.Viper
-	Conn    net.Conn
+	logger     *log.Logger
+	Proxies    map[string]Proxy
+	Config     *viper.Viper
+	Conn       net.Conn
+	StatusChan chan string
 }
 
 func NewProxyClient() *ProxyVsockClient {
@@ -29,9 +30,10 @@ func NewProxyClient() *ProxyVsockClient {
 	_conf := viper.GetViper()
 
 	return &ProxyVsockClient{
-		logger:  log.New(os.Stdout, "[proxy client] ", log.Ldate|log.Ltime|log.Lshortfile),
-		Config:  _conf,
-		Proxies: make(map[string]Proxy),
+		logger:     log.New(os.Stdout, "[proxy client] ", log.Ldate|log.Ltime|log.Lshortfile),
+		Config:     _conf,
+		Proxies:    make(map[string]Proxy),
+		StatusChan: make(chan string),
 	}
 }
 
@@ -48,7 +50,9 @@ MyVsockClient:
 			client.Conn = msg.Conn
 			client.Proxies[PROXY_TYPE_RABBITMQ] = mqproxy.New(client.Config.GetString("node.partyNodeId"), client.Config.GetString("mq.queueName"), client.Config.GetString("mq.addr"), msg.Conn)
 			my_vsock.SendMsg(PROXY_READY, msg.Conn)
+			client.StatusChan <- my_vsock.CONNECTED_OK
 		case my_vsock.VSOCK_EOF:
+			client.StatusChan <- my_vsock.VSOCK_EOF
 			break MyVsockClient
 		default:
 			var message Message
@@ -63,4 +67,8 @@ MyVsockClient:
 			}
 		}
 	}
+}
+
+func (client *ProxyVsockClient) SendMessageToInside(data []byte) {
+	my_vsock.SendMsg(string(data), client.Conn)
 }

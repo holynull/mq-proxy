@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/holynull/mq-proxy/parentproxy"
+	"github.com/holynull/my-vsock/my_vsock"
 )
 
 func main() {
@@ -18,7 +19,18 @@ func main() {
 	switch target {
 	case "client":
 		client := parentproxy.NewProxyClient()
-		client.StartVsockClient(uint32(cid), uint32(port))
+		go client.StartVsockClient(uint32(cid), uint32(port))
+	Loop:
+		for {
+			status := <-client.StatusChan
+			switch status {
+			case my_vsock.CONNECTED_OK:
+				client.SendMessageToInside([]byte("Message request some inside service."))
+			case my_vsock.VSOCK_EOF:
+				break Loop
+
+			}
+		}
 	case "server":
 		server := parentproxy.NewProxyServer()
 		go server.StartServer()
