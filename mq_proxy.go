@@ -24,12 +24,12 @@ func main() {
 		go client.StartVsockClient(uint32(cid), uint32(port))
 	Loop:
 		for {
-			status := <-client.StatusChan // 接受vsock连接状态
+			status := <-client.StatusChan // 接收vsock连接状态
 			switch status {
 			case my_vsock.CONNECTED_OK: // vsock连接成功
 				// 向enclave或者容器内部发送一则消息
 				client.SendMessageToInside([]byte("Message request some inside service."))
-			case my_vsock.VSOCK_EOF: // vsock服务器端端开连接
+			case my_vsock.VSOCK_EOF: // vsock服务器端断开连接
 				break Loop
 			}
 		}
