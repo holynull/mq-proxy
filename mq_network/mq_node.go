@@ -2,6 +2,7 @@ package mq_network
 
 import (
 	"context"
+	"encoding/json"
 	"log"
 	"net"
 	"os"
@@ -16,6 +17,12 @@ const (
 	BROADCAST_EXCHANGE_NAME = "mpc_broadcast_exchange"
 	P2P_EXCHANGE_NAME       = "mpc_p2p_exchange"
 )
+
+type Message struct {
+	From string `json:"from"`
+	To   string `json:"to"`
+	Data string `json:"data"`
+}
 
 type PartyNode struct {
 	logger      *log.Logger
@@ -57,11 +64,28 @@ func New(nodePartyId string, queueName string, client *mqclient.Client) (*PartyN
 }
 
 func (node *PartyNode) BroadcastMessage(data []byte) error {
-	return node.mqClient.PushToExchange(data, BROADCAST_EXCHANGE_NAME, "")
+	msg := Message{
+		From: node.NodePartyId,
+		Data: string(data),
+	}
+	if _d, err := json.Marshal(msg); err != nil {
+		return err
+	} else {
+		return node.mqClient.PushToExchange(_d, BROADCAST_EXCHANGE_NAME, "")
+	}
 }
 
 func (node *PartyNode) SendMessageToNode(data []byte, toNodePartyId string) error {
-	return node.mqClient.PushToExchange(data, P2P_EXCHANGE_NAME, toNodePartyId)
+	msg := Message{
+		From: node.NodePartyId,
+		To:   toNodePartyId,
+		Data: string(data),
+	}
+	if _d, err := json.Marshal(msg); err != nil {
+		return err
+	} else {
+		return node.mqClient.PushToExchange(_d, P2P_EXCHANGE_NAME, toNodePartyId)
+	}
 }
 
 func (node *PartyNode) RunComsumer(conn net.Conn) {
@@ -106,7 +130,7 @@ func (node *PartyNode) RunComsumer(conn net.Conn) {
 
 		case delivery := <-deliveries:
 			// Ack a message every 2 seconds
-			node.logger.Printf("[%s] Received message: %s\n", node.QueueName, delivery.Body)
+			node.logger.Printf("[%s] Received message: %s\n", node.NodePartyId, delivery.Body)
 			if conn == nil {
 				node.MessageChan <- string(delivery.Body)
 			} else {
@@ -115,7 +139,7 @@ func (node *PartyNode) RunComsumer(conn net.Conn) {
 			if err := delivery.Ack(false); err != nil {
 				node.logger.Printf("Error acknowledging message: %s\n", err)
 			}
-			<-time.After(time.Second * 2)
+			// <-time.After(time.Second * 2)
 		}
 	}
 }
