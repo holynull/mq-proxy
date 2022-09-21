@@ -24,13 +24,13 @@ func New(nodePartyId, queueName, addr string, conn net.Conn) *MqProxy {
 	} else {
 		go node.RunComsumer(conn)
 		return &MqProxy{
-			logger: log.New(os.Stdout, "[mqclient] ", log.Ldate|log.Ltime|log.Lshortfile),
+			logger: log.New(os.Stdout, "[mqproxy] ", log.Ldate|log.Ltime|log.Lshortfile),
 			Node:   node,
 		}
 	}
 }
 
-func (proxy *MqProxy) Handle(data map[string]interface{}) {
+func (proxy *MqProxy) Handle(data map[string]interface{}) interface{} {
 	if op, ok := data["op"]; ok {
 		switch op {
 		case OPTERATION_TYPE_BROADCAST:
@@ -45,12 +45,12 @@ func (proxy *MqProxy) Handle(data map[string]interface{}) {
 			_toId, ok := data["toId"].(string)
 			if !ok {
 				proxy.logger.Printf("toId is not a string. %v", data["toId"])
-				return
+				return nil
 			}
 			_d, okd := data["data"].(string)
 			if !okd {
 				proxy.logger.Printf("data is not a string. %v", data["data"])
-				return
+				return nil
 			}
 			if err := proxy.Node.SendMessageToNode([]byte(_d), _toId); err != nil {
 				proxy.logger.Printf("Send message to node failed. %v", err)
@@ -61,4 +61,5 @@ func (proxy *MqProxy) Handle(data map[string]interface{}) {
 	} else {
 		proxy.logger.Printf("op is not a string. %v", data["op"])
 	}
+	return nil
 }

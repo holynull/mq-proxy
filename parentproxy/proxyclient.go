@@ -6,6 +6,7 @@ import (
 	"net"
 	"os"
 
+	"github.com/holynull/mq-proxy/kmsproxy"
 	"github.com/holynull/mq-proxy/mqproxy"
 	"github.com/holynull/my-vsock/my_vsock"
 	"github.com/spf13/viper"
@@ -49,6 +50,7 @@ MyVsockClient:
 			client.logger.Println("Vsock Connected !")
 			client.Conn = msg.Conn
 			client.Proxies[PROXY_TYPE_RABBITMQ] = mqproxy.New(client.Config.GetString("node.partyNodeId"), client.Config.GetString("mq.queueName"), client.Config.GetString("mq.addr"), msg.Conn)
+			client.Proxies[PROXY_TYPE_KMS] = kmsproxy.New(msg.Conn, client.Config.GetString("aws.region"), client.Config.GetString("aws.kms.keyId"))
 			my_vsock.SendMsg(PROXY_READY, msg.Conn)
 			client.StatusChan <- my_vsock.CONNECTED_OK
 		case my_vsock.VSOCK_EOF:

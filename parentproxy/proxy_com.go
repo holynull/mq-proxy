@@ -2,6 +2,7 @@ package parentproxy
 
 const (
 	PROXY_TYPE_RABBITMQ = "rabbitmq"
+	PROXY_TYPE_KMS      = "kms"
 	PROXY_READY         = "proxy_ready"
 )
 
@@ -11,5 +12,5 @@ type Message struct {
 }
 
 type Proxy interface {
-	Handle(data map[string]interface{})
+	Handle(data map[string]interface{}) interface{}
 }
