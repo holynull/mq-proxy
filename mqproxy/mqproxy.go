@@ -6,19 +6,19 @@ import (
 	"os"
 	"time"
 
-	"github.com/holynull/mq-proxy/mpc_network"
+	"github.com/holynull/mq-proxy/mq_network"
 	"github.com/holynull/mq-proxy/mqclient"
 )
 
 type MqProxy struct {
 	logger *log.Logger
-	Node   *mpc_network.PartyNode
+	Node   *mq_network.PartyNode
 }
 
 func New(nodePartyId, queueName, addr string, conn net.Conn) *MqProxy {
 	client := mqclient.New(addr)
 	<-time.After(time.Second)
-	node, err := mpc_network.New(nodePartyId, queueName, client)
+	node, err := mq_network.New(nodePartyId, queueName, client)
 	if err != nil {
 		return nil
 	} else {

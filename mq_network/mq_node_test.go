@@ -1,4 +1,4 @@
-package mpc_network
+package mq_network
 
 import (
 	"testing"
