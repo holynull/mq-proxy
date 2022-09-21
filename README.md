@@ -6,13 +6,13 @@
 
 mq_proxy能够接收一个名为target的参数。当target等于client时，表示启动运行在enclave外部宿主机上的程序；当target等于server时，表示启动运行在enclave内部的程序。
 
-当target为client时，还需要另外两个参数cid和port；本别表示enclave或者容器的cid和vsock服务的端口号。
+当target为client时，还需要另外两个参数cid和port；分别表示enclave或者容器的cid和vsock服务的端口号。
 
 ```
 # 在宿主机上
 mq_proxy --target=client --cid=3 --port=3000
 
-# 在enclave内
+# 在enclave或者容器内
 mq_proxy --target=server
 
 ```
