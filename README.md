@@ -37,7 +37,7 @@ mq_proxy --target=server
 
 ## KMS加密代理
 
-*** 前提条件 *** 需要在支持Nitro Enclave的EC2服务器上测试
+***前提条件*** 需要在支持Nitro Enclave的EC2服务器上测试
 
 1. 在开发环境中，先运行`build.sh`
 
