@@ -9,7 +9,7 @@ import (
 
 func (server *ProxyVsockServer) Encrypt(data []byte) {
 	msg := make(map[string]interface{}, 0)
-	msg["type"] = PROXY_TYPE_RABBITMQ
+	msg["type"] = PROXY_TYPE_KMS
 	_d := make(map[string]interface{}, 0)
 	_d["op"] = kmsproxy.OPTERATION_ENCRYPT
 	_d["data"] = string(data)
