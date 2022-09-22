@@ -35,3 +35,26 @@ mq_proxy --target=server
 ./start-docker-proxy-server.sh
 ```
 
+## KMS加密代理
+
+*** 前提条件 *** 需要在支持Nitro Enclave的EC2服务器上测试
+
+1. 在开发环境中，先运行`build.sh`
+
+2. 然后运行`upload.sh`，将需要的文件上传至服务器
+
+3. 登陆到服务器
+
+4. 在服务器上运行`build-coker-image.sh`创建docker镜像
+
+5. 再运行`build-eif.sh`创建eif文件
+
+6. 执行`create_enclave.sh`创建并启动enclave
+
+7. 打开enclave的console，`nitro-cli console --enclave-id`
+
+8. 在另外一个登陆了服务器的终端中，执行`mq_proxy --target=client --cid=enclave的cid --port=3000`
+
+enclave在收到proxy准备就绪后，除了执行之前广播和p2p消息外，会请求kms代理加密字符串“Hello world!”，后台可以看到加密后的cipher字符串。
+
+另，`clear_all.sh`可以清除存在的enclave和docker中proxy_server镜像。
