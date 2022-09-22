@@ -1,0 +1,9 @@
+scp ./mq_proxy nitro_enclaves_1:~/mq-proxy/ 
+scp ./Dockerfile.al2 nitro_enclaves_1:~/mq-proxy/ 
+scp ./build-docker-image.sh nitro_enclaves_1:~/mq-proxy/ 
+scp ./clear_images.sh nitro_enclaves_1:~/mq-proxy/ 
+scp ./clear_all.sh nitro_enclaves_1:~/mq-proxy/ 
+scp ./build-eif.sh nitro_enclaves_1:~/mq-proxy/ 
+scp ./create_enclave.sh nitro_enclaves_1:~/mq-proxy/ 
+scp ./config_client.yml nitro_enclaves_1:~/mq-proxy/ 
+scp ./config_server.yml nitro_enclaves_1:~/mq-proxy/ 

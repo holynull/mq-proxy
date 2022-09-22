@@ -2,6 +2,7 @@ package kmsproxy
 
 import (
 	"context"
+	"encoding/base64"
 	"log"
 	"net"
 	"os"
@@ -49,7 +50,8 @@ func (proxy *KmsProxy) Handle(data map[string]interface{}) interface{} {
 					proxy.logger.Printf("Encrypt failed. %v", err)
 					return nil
 				} else {
-					proxy.logger.Printf("Encrypt cipher is: %s", string(out.CiphertextBlob))
+					dst := base64.StdEncoding.EncodeToString(out.CiphertextBlob)
+					proxy.logger.Printf("Encrypt cipher is: %s", string(dst))
 					return _d
 				}
 			} else {

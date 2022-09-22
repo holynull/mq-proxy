@@ -1,0 +1,1 @@
+sudo nitro-cli run-enclave --eif-path ./proxy_server.eif --memory 1024 --cpu-count 2 --debug-mode 

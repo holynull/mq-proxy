@@ -44,6 +44,7 @@ func main() {
 				if pStatus == parentproxy.PROXY_READY { // 宿主端代理服务状态准备就绪
 					server.BroadcastMessage([]byte("Broadcast Message!"))                         // 试着广播一个消息
 					server.SendMessageToNode([]byte("Send a message to node 2!"), "party_node_2") // 向node id为party_node_2的节点发送一则消息
+					server.Encrypt([]byte("Hello world!"))                                        // kms加密
 				}
 			case msgFromOutside := <-server.MessageFromOutSide: // 接收从宿主端发送进来的其他信息
 				log.Printf("Get message from outside: %s", msgFromOutside)

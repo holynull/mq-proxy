@@ -4,6 +4,6 @@ mq:
 node:
   partyNodeId: party_node_1
 aws:
-  region: ap-south-east-1
+  region: ap-southeast-1
   kms:
     keyId: ae4bf69f-36f7-42cc-8ed3-11c3c8f5b49d
